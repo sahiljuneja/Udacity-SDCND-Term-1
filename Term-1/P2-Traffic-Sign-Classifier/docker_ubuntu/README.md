@@ -15,10 +15,10 @@ Please note that the following instance will cost you, and I have only tried wit
  
 2. Once Instance is launched, SSH into it. I use Putty. Refer to http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/putty.html for details.
 
-3. Run the following after SSHing
+3. After SSHing
 	* $ sudo apt-get install git
-	* git clone https://github.com/yourHandle/whereYouSavedYourProjectFiles.git
-	* grab https://github.com/sahiljuneja/Udacity-Self-Driving-Car-ND/tree/master/Term-1/P2-Traffic-Sign-Classifier/docker_ubuntu
+	* $ git clone https://github.com/yourHandle/whereYouSavedYourProjectFiles.git
+	* Download the folder https://github.com/sahiljuneja/Udacity-Self-Driving-Car-ND/tree/master/Term-1/P2-Traffic-Sign-Classifier/docker_ubuntu
 
 4. Build Docker Container
 	* $ cd docker_ubuntu (wherever cloned/downloaded)
