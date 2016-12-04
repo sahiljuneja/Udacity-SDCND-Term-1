@@ -1,0 +1,15 @@
+FROM ubuntu:trusty
+
+RUN apt-get update
+
+# Helper libraries
+RUN apt-get install -y \
+       git \
+       man \
+       python-dev \
+       python-pip \
+       vim
+
+EXPOSE 5000-65535
+
+CMD ["/bin/bash"]
