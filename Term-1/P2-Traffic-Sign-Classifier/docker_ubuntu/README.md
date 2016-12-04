@@ -6,7 +6,10 @@ Thanks to Hasan Korre for these files https://github.com/hkorre/traffic-signs/tr
 
 ### Overview
 
-This folder consists of scripts to download, install and run a docker container for Project 2 in an AWS instance (Non-GPU).
+This folder consists of scripts to download, install and run a docker container for Project 2 in an AWS instance (Non-GPU). I used a spot instance and it cost me 28 cents
+for 3 hours of usage the on time I tried it out. It's faster than my laptop but still not as fast you would expect without a GPU. Much faster alternative, and subsequently
+more expensive one would be - `https://github.com/gtarobotics/self-driving-car#amazon-aws-ec2-ami-with-gtaroboticsudacity-sdc-image-installed` 
+
 
 ### Instructions
 Please note that the following instance will cost you, and I have only tried with the following (spot) instance as of now. Any further experimentation is on you.
