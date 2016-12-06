@@ -35,7 +35,7 @@ Please note that the following instance will cost you, and I have only tried wit
 
 6. Edit run.sh and Run the Container
 	* In run.sh modify the line `-v /home/ubuntu/Udacity-Self-Driving-Car-ND:/home/Udacity-Self-Driving-Car-ND \ ` to correspond to your own cloned project repo directory
-	* $ `sudo ./run.sh`
+	* $ `sudo ./run.sh` (You might have to press "Enter" again after running the command)
 
 7. Run notebook
 	* `jupyter notebook --ip='*' --port=8888 --no-browser`
