@@ -2,3 +2,8 @@ data
 models
 .ipynb_checkpoints
 bottlenecks
+vgg_cifar10_100_bottleneck_features_train.p
+vgg_cifar10_bottleneck_features_validation.p
+vgg_traffic_100_bottleneck_features_train.p
+vgg_traffic_bottleneck_features_validation.p
+
