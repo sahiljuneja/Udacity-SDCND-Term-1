@@ -94,9 +94,19 @@ model.compile(loss='mse',
               optimizer=Adam(),
               metrics=['mean_absolute_error', 'accuracy'])
 
+### Save Model
+with open('model.json', 'w') as f:
+	json.dump(model.to_json(), f)
+with open('model_read.json', 'w') as f:
+	json.dump(json.loads(model.to_json()), f,
+			indent=4, separators=(',', ': '))
 
 history = model.fit_generator(data_generator(X_train, y_train, batch_size), 
 											samples_per_epoch=len(y_train), 
 											nb_epoch = nb_epoch,
 											verbose = 1,
 											validation_data = (X_test, y_test))
+											
+
+### Save weights
+model.save_weights('model.h5')
