@@ -4,12 +4,15 @@ import numpy as np
 import pandas as pd
 import matplotlib.image as mpimg
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 from sklearn import preprocessing
 import cv2
 import math
 import time
 import h5py
 import json
+import os
+
 
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
@@ -29,7 +32,7 @@ for idx, val in enumerate(images):
         image = mpimg.imread("Recorded Data/IMG/" + images[idx])
         center_images.append(image)
 
-features = np.array(center_images)
+features = np.array(center_images[:len(center_images)-1))
 
 # Read in CSV file
 csv_loc = "Recorded Data/driving_log.csv"
@@ -50,6 +53,7 @@ X_train = np.array([normalize_img(image) for image in X_train], dtype=np.float32
 X_test = np.array([normalize_img(image) for image in X_test], dtype=np.float32)
 
 ### Helper Functions
+'''
 def data_generator(features, labels, batch_size):
 	total_batch = int(len(features)/batch_size)
 
@@ -62,7 +66,16 @@ def data_generator(features, labels, batch_size):
         batch_x = features[idx_l:idx_h]
         batch_y = labels[idx_l:idx_h]
 		
-		yield batch_x, batch_y
+		yield (batch_x, batch_y)
+'''
+def data_generator(images, labels, batch_size):
+	idxs = np.arange(images.shape[0])
+	total_batch = int(len(features)/batch_size)
+		for i in range(total_batch):
+			batch_idx = np.random.choice(idxs, size=batch_size, replace=False)
+			batch_images = images[batch_idx]
+			batch_labels = labels[batch_idx]
+			yield batch_images, batch_labels
 		
 	
 ### Parameters
@@ -82,13 +95,13 @@ model.add(Dropout(0.5))
 model.add(Flatten())
 model.add(Dense(num_neurons))
 model.add(Activation('relu'))
-model.add(Dense(num_classes))
+model.add(Dense(1))
 
 model.summary()
 
 ### Compile and Train
-X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], X_train.shape[2],X_train.shape[3] )
-X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], X_test.shape[3], X_test.shape[3])
+#X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], X_train.shape[2],X_train.shape[3] )
+#X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], X_test.shape[3], X_test.shape[3])
 
 model.compile(loss='mse',
               optimizer=Adam(),
@@ -103,7 +116,7 @@ with open('model_read.json', 'w') as f:
 
 history = model.fit_generator(data_generator(X_train, y_train, batch_size), 
 											samples_per_epoch=len(y_train), 
-											nb_epoch = nb_epoch,
+											nb_epoch = epochs,
 											verbose = 1,
 											validation_data = (X_test, y_test))
 											
