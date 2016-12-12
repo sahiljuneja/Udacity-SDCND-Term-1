@@ -50,6 +50,8 @@ layer_1_depth = 32
 filter_size = 5
 num_classes = len(np.unique(y_train))
 num_neurons = 128
+epochs = 2
+batch_size = 32
  
 ### Model
 model = Sequential()
@@ -63,3 +65,21 @@ model.add(Activation('relu'))
 model.add(Dense(num_classes))
 
 model.summary()
+
+### Compile and Train
+y_train = y_train.astype(int)
+y_test = y_test.astype(int)
+
+y_train = np_utils.to_categorical(y_train, nb_classes=num_classes)
+y_test = np_utils.to_categorical(y_val, nb_classes=num_classes)
+
+X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], X_train.shape[2],X_train.shape[3] )
+X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], X_test.shape[3], X_test.shape[3])
+
+model.compile(loss='categorical_crossentropy',
+              optimizer=Adam(),
+              metrics=['accuracy'])
+
+history = model.fit(X_train, y_train,
+                    batch_size=batch_size, nb_epoch=epoch,
+                    verbose=1, validation_data=(X_test, y_test))
