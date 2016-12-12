@@ -32,7 +32,7 @@ for idx, val in enumerate(images):
         image = mpimg.imread("Recorded Data/IMG/" + images[idx])
         center_images.append(image)
 
-features = np.array(center_images[:len(center_images)-1))
+features = np.array(center_images[:len(center_images)-1])
 
 # Read in CSV file
 csv_loc = "Recorded Data/driving_log.csv"
@@ -69,14 +69,18 @@ def data_generator(features, labels, batch_size):
 		yield (batch_x, batch_y)
 '''
 def data_generator(images, labels, batch_size):
-	idxs = np.arange(images.shape[0])
-	total_batch = int(len(features)/batch_size)
-		for i in range(total_batch):
-			batch_idx = np.random.choice(idxs, size=batch_size, replace=False)
-			batch_images = images[batch_idx]
-			batch_labels = labels[batch_idx]
-			yield batch_images, batch_labels
-		
+    idxs = np.arange(images.shape[0])
+    total_batch = int(len(images)/batch_size)
+    while True:
+        for i in range(total_batch):
+            batch_idx = np.random.choice(idxs, size=batch_size, replace=False)
+            batch_images = images[batch_idx]
+            batch_labels = labels[batch_idx]
+            yield (batch_images, batch_labels)
+
+print("Test")
+print(X_train.shape[0])
+print(y_train.shape[0])
 	
 ### Parameters
 layer_1_depth = 32
@@ -115,7 +119,7 @@ with open('model_read.json', 'w') as f:
 			indent=4, separators=(',', ': '))
 
 history = model.fit_generator(data_generator(X_train, y_train, batch_size), 
-											samples_per_epoch=len(y_train), 
+											samples_per_epoch=X_train.shape[0], 
 											nb_epoch = epochs,
 											verbose = 1,
 											validation_data = (X_test, y_test))
