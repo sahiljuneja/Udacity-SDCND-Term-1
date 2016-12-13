@@ -23,19 +23,19 @@ from keras.utils import np_utils
 
 ### Load data
 # Read in images
-images = os.listdir("Recorded Data/IMG/")
+images = os.listdir("data/IMG/")
 center_images = []
 
 for idx, val in enumerate(images):
     # reading in an image
     if 'center' in images[idx]:
-        image = mpimg.imread("Recorded Data/IMG/" + images[idx])
+        image = mpimg.imread("data/IMG/" + images[idx])
         center_images.append(image)
 
-features = np.array(center_images[:len(center_images)-1])
+features = np.array(center_images)
 
 # Read in CSV file
-csv_loc = "Recorded Data/driving_log.csv"
+csv_loc = "data/driving_log.csv"
 df = pd.read_csv(csv_loc)
 labels = df.iloc[:,3]
 labels = labels.values.tolist()
@@ -79,16 +79,18 @@ def data_generator(images, labels, batch_size):
             yield (batch_images, batch_labels)
 
 print("Test")
-print(X_train.shape[0])
-print(y_train.shape[0])
+print(X_train.shape[1:])
 	
 ### Parameters
 layer_1_depth = 32
+layer_2_depth = 64
 filter_size = 5
 num_classes = len(np.unique(y_train))
-num_neurons = 128
-epochs = 2
-batch_size = 32
+num_neurons_1 = 128
+num_neurons_2 = 256
+epochs = 4
+batch_size = 64
+samples_per_epoch = X_train.shape[0]
  
 ### Model
 model = Sequential()
@@ -96,9 +98,25 @@ model.add(Convolution2D(layer_1_depth, filter_size, filter_size, border_mode = '
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
-model.add(Flatten())
-model.add(Dense(num_neurons))
+model.add(Convolution2D(layer_2_depth, filter_size, filter_size, border_mode = 'valid'))
 model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Dropout(0.5)) 
+model.add(Convolution2D(128, filter_size, filter_size, border_mode = 'valid'))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Dropout(0.5))
+model.add(Convolution2D(128, filter_size, filter_size, border_mode = 'valid'))
+model.add(Activation('relu'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Dropout(0.5))
+model.add(Flatten())
+model.add(Dense(num_neurons_1))
+model.add(Activation('relu'))
+model.add(Dropout(0.5))
+model.add(Dense(num_neurons_2))
+model.add(Activation('relu'))
+model.add(Dropout(0.5))
 model.add(Dense(1))
 
 model.summary()
@@ -119,7 +137,7 @@ with open('model_read.json', 'w') as f:
 			indent=4, separators=(',', ': '))
 
 history = model.fit_generator(data_generator(X_train, y_train, batch_size), 
-											samples_per_epoch=X_train.shape[0], 
+											samples_per_epoch=samples_per_epoch, 
 											nb_epoch = epochs,
 											verbose = 1,
 											validation_data = (X_test, y_test))
