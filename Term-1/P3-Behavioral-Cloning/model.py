@@ -53,30 +53,22 @@ X_train = np.array([normalize_img(image) for image in X_train], dtype=np.float32
 X_test = np.array([normalize_img(image) for image in X_test], dtype=np.float32)
 
 ### Helper Functions
-'''
+
 def data_generator(features, labels, batch_size):
 	total_batch = int(len(features)/batch_size)
 
-    features, labels = shuffle(features, labels)
+	while True:
+		features, labels = shuffle(features, labels)
 
-    for i in range(total_batch):
-        idx_l = i*batch_size
-        idx_h = idx_l + batch_size
+		for i in range(total_batch):
+			idx_l = i*batch_size
+			idx_h = idx_l + batch_size
 
-        batch_x = features[idx_l:idx_h]
-        batch_y = labels[idx_l:idx_h]
+			batch_x = features[idx_l:idx_h]
+			batch_y = labels[idx_l:idx_h]
 		
-		yield (batch_x, batch_y)
-'''
-def data_generator(images, labels, batch_size):
-    idxs = np.arange(images.shape[0])
-    total_batch = int(len(images)/batch_size)
-    while True:
-        for i in range(total_batch):
-            batch_idx = np.random.choice(idxs, size=batch_size, replace=False)
-            batch_images = images[batch_idx]
-            batch_labels = labels[batch_idx]
-            yield (batch_images, batch_labels)
+			yield (batch_x, batch_y)
+
 
 print("Test")
 print(X_train.shape[1:])
