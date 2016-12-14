@@ -39,11 +39,10 @@ print("Length of Features: {0}, Labels: {1}".format(len(features), len(labels))
 images = os.listdir("data/IMG/")
 center_images = []
 
-for idx, val in enumerate(images):
+for idx in range(len(features)):
     # reading in an image
-    if features[idx] in images[idx]:
-        image = mpimg.imread("data/IMG/" + images[idx])
-        center_images.append(image)
+	image = mpimg.imread("data/IMG/" + features[idx])
+	center_images.append(image)
 
 
 features = np.array(center_images)
