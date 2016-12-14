@@ -27,26 +27,25 @@ from keras.utils import np_utils
 # Read in CSV file
 csv_loc = "data/driving_log.csv"
 df = pd.read_csv(csv_loc)
-features = df['center']
-features = features.map(lambda x: x.lstrip('IMG/'))
-labels = df['steering']
-labels = labels.values.tolist()
-features = features.values.tolist()
+features_col = df['center']
+features_col = features_col.map(lambda x: x.lstrip('IMG/'))
+labels_col = df['steering']
+labels_col = labels_col.values.tolist()
+features_col = features_col.values.tolist()
 
-print("Length of Features: {0}, Labels: {1}".format(len(features), len(labels)))
+print("Length of Features: {0}, Labels: {1}".format(len(features_col), len(labels_col)))
 
 # Read in images
 images = os.listdir("data/IMG/")
 center_images = []
 
-for idx in range(len(features)):
+for idx in range(len(features_col)):
     # reading in an image
-	image = mpimg.imread("data/IMG/" + features[idx])
+	image = mpimg.imread("data/IMG/" + features_col[idx])
 	center_images.append(image)
 
-
 features = np.array(center_images)
-labels = np.array(labels)
+labels = np.array(labels_col)
 
 print("Length of Features: {0}, Labels: {1}".format(len(features), len(labels)))
 
@@ -62,23 +61,23 @@ X_test = np.array([normalize_img(image) for image in X_test], dtype=np.float32)
 
 ### Helper Functions
 
-def data_generator(features, labels, batch_size):
-	num_rows = int(len(features))
+def data_generator(train_features, train_labels, batch_size):
+	num_rows = int(len(train_features))
 	ctr = None
-	batch_x = np.zeros((batch_size, features.shape[1], features.shape[2], 3))
+	batch_x = np.zeros((batch_size, train_features.shape[1], train_features.shape[2], 3))
     batch_y = np.zeros(batch_size)
 	while True:
-		batch_x, batch_y = shuffle(batch_x, batch_y)
-
+		print("In while")
 		for i in range(batch_size):
+			print("In for")
 			if ctr is None or ctr >= num_rows:
 				ctr = 0
-			idx_l = i*batch_size
-			idx_h = idx_l + batch_size
+				batch_x, batch_y = shuffle(batch_x, batch_y)
 
-			batch_x = features[idx_l:idx_h]
-			batch_y = labels[idx_l:idx_h]
+			batch_x[i] = train_features[i]
+			batch_y[i] = train_labels[i]
 			ctr += 1
+		print("Outside for and ctr: {0}".format(ctr))
 		yield (batch_x, batch_y)
 
 print("Test")
