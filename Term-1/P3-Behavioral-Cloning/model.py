@@ -65,8 +65,10 @@ X_test = np.array([normalize_img(image) for image in X_test], dtype=np.float32)
 def data_generator(features, labels, batch_size):
 	num_rows = int(len(features))
 	ctr = None
+	batch_x = np.zeros((batch_size, features.shape[1], features.shape[2], 3))
+    batch_y = np.zeros(batch_size)
 	while True:
-		features, labels = shuffle(features, labels)
+		batch_x, batch_y = shuffle(batch_x, batch_y)
 
 		for i in range(batch_size):
 			if ctr is None or ctr >= num_rows:
