@@ -27,13 +27,13 @@ from keras.utils import np_utils
 # Read in CSV file
 csv_loc = "data/driving_log.csv"
 df = pd.read_csv(csv_loc)
-features = df.iloc['center']
+features = df['center']
 features = features.map(lambda x: x.lstrip('IMG/'))
-labels = df.iloc['steering']
+labels = df['steering']
 labels = labels.values.tolist()
 features = features.values.tolist()
 
-print("Length of Features: {0}, Labels: {1}".format(len(features), len(labels))
+print("Length of Features: {0}, Labels: {1}".format(len(features), len(labels)))
 
 # Read in images
 images = os.listdir("data/IMG/")
@@ -48,7 +48,7 @@ for idx in range(len(features)):
 features = np.array(center_images)
 labels = np.array(labels)
 
-print("Length of Features: {0}, Labels: {1}".format(len(features), len(labels))
+print("Length of Features: {0}, Labels: {1}".format(len(features), len(labels)))
 
 ### Split data
 X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.15, random_state=432422)
@@ -63,20 +63,21 @@ X_test = np.array([normalize_img(image) for image in X_test], dtype=np.float32)
 ### Helper Functions
 
 def data_generator(features, labels, batch_size):
-	total_batch = int(len(features)/batch_size)
-
+	num_rows = int(len(features))
+	ctr = None
 	while True:
 		features, labels = shuffle(features, labels)
 
-		for i in range(total_batch):
+		for i in range(batch_size):
+			if ctr is None or ctr >= num_rows:
+				ctr = 0
 			idx_l = i*batch_size
 			idx_h = idx_l + batch_size
 
 			batch_x = features[idx_l:idx_h]
 			batch_y = labels[idx_l:idx_h]
-		
-			yield (batch_x, batch_y)
-
+			ctr += 1
+		yield (batch_x, batch_y)
 
 print("Test")
 print(X_train.shape[1:])
