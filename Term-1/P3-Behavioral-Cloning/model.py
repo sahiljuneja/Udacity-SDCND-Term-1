@@ -52,15 +52,23 @@ print("Length of Features: {0}, Labels: {1}".format(len(features), len(labels)))
 ### Split data
 X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.15, random_state=432422)
 
-### Normalize
+### Pre-Process
+# Resize
+def resize_img(image):
+    return cv2.resize(image, (160, 80))
+    
+# Normalize
 def normalize_img(image):
 	return cv2.normalize(image, None, alpha=-0.5, beta=0.5, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+
+X_train = np.array([resize_img(image) for image in X_train], dtype=np.float32)
+X_test = np.array([resize_img(image) for image in X_test], dtype=np.float32)
 
 X_train = np.array([normalize_img(image) for image in X_train], dtype=np.float32)
 X_test = np.array([normalize_img(image) for image in X_test], dtype=np.float32)
 
 ### Helper Functions
-
+'''
 def data_generator(train_features, train_labels, batch_size):
 	num_rows = int(len(train_features))
 	ctr = None
@@ -72,14 +80,14 @@ def data_generator(train_features, train_labels, batch_size):
 			print("In for")
 			if ctr is None or ctr >= num_rows:
 				ctr = 0
-				batch_x, batch_y = shuffle(batch_x, batch_y)
+				train_features, train_labels = shuffle(train_features, train_labels)
 
 			batch_x[i] = train_features[i]
 			batch_y[i] = train_labels[i]
 			ctr += 1
 		print("Outside for and ctr: {0}".format(ctr))
 		yield (batch_x, batch_y)
-
+'''
 print("Test")
 print(X_train.shape[1:])
 	
@@ -138,12 +146,17 @@ with open('model_read.json', 'w') as f:
 	json.dump(json.loads(model.to_json()), f,
 			indent=4, separators=(',', ': '))
 
+
+history = model.fit(X_train, y_train,
+                    batch_size=batch_size, nb_epoch=epochs,
+                    verbose=1, validation_data=(X_test, y_test))                                            
+'''
 history = model.fit_generator(data_generator(X_train, y_train, batch_size), 
 											samples_per_epoch=samples_per_epoch, 
 											nb_epoch = epochs,
 											verbose = 1,
 											validation_data = (X_test, y_test))
-											
+'''
 
 ### Save weights
 model.save_weights('model.h5')
