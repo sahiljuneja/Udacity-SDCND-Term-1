@@ -22,25 +22,34 @@ from keras.utils import np_utils
 
 
 ### Load data
+#TODO Improve the following if possible.
+
+# Read in CSV file
+csv_loc = "data/driving_log.csv"
+df = pd.read_csv(csv_loc)
+features = df.iloc['center']
+features = features.map(lambda x: x.lstrip('IMG/'))
+labels = df.iloc['steering']
+labels = labels.values.tolist()
+features = features.values.tolist()
+
+print("Length of Features: {0}, Labels: {1}".format(len(features), len(labels))
+
 # Read in images
 images = os.listdir("data/IMG/")
 center_images = []
 
 for idx, val in enumerate(images):
     # reading in an image
-    if 'center' in images[idx]:
+    if features[idx] in images[idx]:
         image = mpimg.imread("data/IMG/" + images[idx])
         center_images.append(image)
 
+
 features = np.array(center_images)
-
-# Read in CSV file
-csv_loc = "data/driving_log.csv"
-df = pd.read_csv(csv_loc)
-labels = df.iloc[:,3]
-labels = labels.values.tolist()
-
 labels = np.array(labels)
+
+print("Length of Features: {0}, Labels: {1}".format(len(features), len(labels))
 
 ### Split data
 X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.15, random_state=432422)
