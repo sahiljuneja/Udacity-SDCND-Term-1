@@ -51,10 +51,17 @@ print("Length of Features: {0}, Labels: {1}".format(len(features), len(labels)))
 
 ### Split data
 X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.15, random_state=432422)
+'''
+mpimg.imsave("pre_crop_test_1.jpg", X_train[0])
+mpimg.imsave("pre_crop_test_2.jpg", X_train[1])
+mpimg.imsave("pre_crop_test_3.jpg", X_train[50])
+'''
 
 ### Pre-Process
 # Resize
 def resize_img(image):
+    # And crop
+    image = image[60:140,40:280]
     return cv2.resize(image, (160, 80))
     
 # Normalize
@@ -63,7 +70,11 @@ def normalize_img(image):
 
 X_train = np.array([resize_img(image) for image in X_train], dtype=np.float32)
 X_test = np.array([resize_img(image) for image in X_test], dtype=np.float32)
-
+'''
+mpimg.imsave("crop_test_1.jpg", X_train[0])
+mpimg.imsave("crop_test_2.jpg", X_train[1])
+mpimg.imsave("crop_test_3.jpg", X_train[50])
+'''
 X_train = np.array([normalize_img(image) for image in X_train], dtype=np.float32)
 X_test = np.array([normalize_img(image) for image in X_test], dtype=np.float32)
 
@@ -92,34 +103,32 @@ print("Test")
 print(X_train.shape[1:])
 	
 ### Parameters
-layer_1_depth = 32
-layer_2_depth = 64
+layer_1_depth = 24
+layer_2_depth = 36
+layer_3_depth = 48
 filter_size = 5
 num_classes = len(np.unique(y_train))
-num_neurons_1 = 128
-num_neurons_2 = 256
-epochs = 4
+num_neurons_1 = 512
+num_neurons_2 = 128
+epochs = 5
 batch_size = 64
 samples_per_epoch = X_train.shape[0]
  
 ### Model
 model = Sequential()
-model.add(Convolution2D(layer_1_depth, filter_size, filter_size, border_mode = 'valid', input_shape = X_train.shape[1:]))
+model.add(Convolution2D(layer_1_depth, filter_size, filter_size, border_mode = 'valid', subsample = (2,2), input_shape = X_train.shape[1:]))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
-model.add(Convolution2D(layer_2_depth, filter_size, filter_size, border_mode = 'valid'))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2,2)))
-model.add(Dropout(0.5)) 
-model.add(Convolution2D(128, filter_size, filter_size, border_mode = 'valid'))
+model.add(Convolution2D(layer_2_depth, filter_size, filter_size, border_mode = 'valid', subsample = (1,1)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
-model.add(Convolution2D(128, filter_size, filter_size, border_mode = 'valid'))
+model.add(Convolution2D(layer_3_depth, 3, 3, border_mode = 'valid', subsample = (1,1)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
+
 model.add(Flatten())
 model.add(Dense(num_neurons_1))
 model.add(Activation('relu'))
@@ -136,7 +145,7 @@ model.summary()
 #X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], X_test.shape[3], X_test.shape[3])
 
 model.compile(loss='mse',
-              optimizer=Adam(),
+              optimizer=Adam(lr = 0.0001),
               metrics=['mean_absolute_error', 'accuracy'])
 
 ### Save Model
