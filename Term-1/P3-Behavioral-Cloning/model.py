@@ -29,14 +29,17 @@ csv_loc = "data/driving_log.csv"
 df = pd.read_csv(csv_loc)
 
 # Add c,l and r images.
-features_col = df['center', 'left', 'right']
-features_col = np.array(features_col.values.tolist(), dtype=np.float32)
+features_col = pd.concat([df['center'], df['left'], df['right']])
+features_col = np.array(features_col.values.tolist())
 
 # Add steering angles for c,l,r with added shift for l and r images
 l_shift = 0.2
 r_shift = -0.2
-labels_col = df['steering', 'steering' + l_shift, 'steering' + r_shift]
-labels_col = np.array(labels_col.values.tolist(), dtype=np.float32)
+labels_c = df['steering']
+labels_r = df['steering'] + r_shift
+labels_l = df['steering'] + l_shift
+labels_col = pd.concat([labels_c, labels_l, labels_r])
+labels_col = np.array(labels_col.values.tolist())
 
 print("Length of Features: {0}, Labels: {1}".format(len(features_col), len(labels_col)))
 
@@ -63,8 +66,8 @@ def preprocess_image(image):
 
 ### Helper Functions
 
-def image_generator(csv_features, csv_labels, batch_size):
-    csv_features, csv_labels = shufle(csv_features, csv_labels)
+def image_generator(csv_features, csv_labels):
+    csv_features, csv_labels = shuffle(csv_features, csv_labels)
     for idx in range(len(csv_features)):
         image = mpimg.imread("data/" + csv_features[idx])
         image = preprocess_image(image)
@@ -72,7 +75,7 @@ def image_generator(csv_features, csv_labels, batch_size):
 
         yield image, label
 
-def data_generator(csv_features, csv_labels, batch_size):
+def train_data_generator(csv_features, csv_labels, batch_size):
     num_rows = int(len(csv_features))
     ctr = None
     batch_x = np.zeros((batch_size, img_rows, img_cols, 3))
@@ -84,13 +87,31 @@ def data_generator(csv_features, csv_labels, batch_size):
             if ctr is None or ctr >= num_rows:
                 print("length of batch: {0}".format(len(batch_x)))
                 ctr = 0
-                new_feature, new_label = image_generator(csv_features, csv_labels)
-            batch_x[i], batch_y[i] = next(new_feature, new_label)
+                images = image_generator(csv_features, csv_labels)
+            batch_x[i], batch_y[i] = next(images)
             ctr += 1
         
         yield (batch_x, batch_y)
 
-print(X_train.shape[1:])
+def valid_data_generator(csv_features, csv_labels, batch_size):
+    num_rows = int(len(csv_features))
+    ctr = None
+    batch_x = np.zeros((batch_size, img_rows, img_cols, 3))
+    batch_y = np.zeros(batch_size)
+    while True:
+        print("In while")
+        for i in range(batch_size):
+            print("In for")
+            if ctr is None or ctr >= num_rows:
+                print("length of batch: {0}".format(len(batch_x)))
+                ctr = 0
+                images = image_generator(csv_features, csv_labels)
+            batch_x[i], batch_y[i] = next(images)
+            ctr += 1
+        
+        yield (batch_x, batch_y)
+        
+print(X_train.shape)
 	
 ### Parameters
 layer_1_depth = 24
@@ -106,7 +127,7 @@ samples_per_epoch = X_train.shape[0]
  
 ### Model
 model = Sequential()
-model.add(Convolution2D(layer_1_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (2,2), input_shape = X_train.shape[1:]))
+model.add(Convolution2D(layer_1_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (2,2), input_shape = (img_rows, img_cols, 3)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
@@ -138,11 +159,12 @@ model.compile(loss='mse',
 with open('model.json', 'w') as f:
 	json.dump(model.to_json(), f)                                           
 
-history = model.fit_generator(data_generator(X_train, y_train, batch_size), 
+history = model.fit_generator(train_data_generator(X_train, y_train, batch_size), 
 											samples_per_epoch=samples_per_epoch, 
 											nb_epoch = epochs,
 											verbose = 1,
-											validation_data = (X_test, y_test))
+											validation_data = valid_data_generator(X_val, y_val, batch_size),
+                                                                                        nb_val_samples=X_val.shape[0])
 
 
 ### Save weights
