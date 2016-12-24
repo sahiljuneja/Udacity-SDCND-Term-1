@@ -29,7 +29,7 @@ csv_loc = "data/driving_log.csv"
 df = pd.read_csv(csv_loc)
 
 # Add c,l and r images.
-features_col = pd.concat([df['center'], df['left'], df['right']])
+features_col = pd.concat([df['center'], df['left'].map(str.strip), df['right'].map(str.strip)])
 features_col = np.array(features_col.values.tolist())
 
 # Add steering angles for c,l,r with added shift for l and r images
@@ -51,8 +51,8 @@ X_train, X_val, y_train, y_val = train_test_split(features_col, labels_col, test
 images = os.listdir("data/IMG/")
 
 ### Pre-Process
-img_rows = 160
-img_cols = 80
+img_cols = 160
+img_rows = 80
 
 def preprocess_image(image):
     # Crop and resize
@@ -71,6 +71,7 @@ def image_generator(csv_features, csv_labels):
     for idx in range(len(csv_features)):
         image = mpimg.imread("data/" + csv_features[idx])
         image = preprocess_image(image)
+        #print("image shape: {0}".format(image.shape))
         label = csv_labels[idx]
 
         yield image, label
@@ -78,10 +79,10 @@ def image_generator(csv_features, csv_labels):
 def train_data_generator(csv_features, csv_labels, batch_size):
     num_rows = int(len(csv_features))
     ctr = None
-    batch_x = np.zeros((batch_size, img_rows, img_cols, 3))
+    batch_x = np.zeros((batch_size, img_cols, img_rows, 3))
     batch_y = np.zeros(batch_size)
     while True:
-        print("In while")
+        
         for i in range(batch_size):
             print("In for")
             if ctr is None or ctr >= num_rows:
@@ -127,7 +128,7 @@ samples_per_epoch = X_train.shape[0]
  
 ### Model
 model = Sequential()
-model.add(Convolution2D(layer_1_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (2,2), input_shape = (img_rows, img_cols, 3)))
+model.add(Convolution2D(layer_1_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (2,2), input_shape = (img_cols, img_rows, 3)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
