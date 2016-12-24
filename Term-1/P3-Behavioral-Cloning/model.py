@@ -1,18 +1,18 @@
 ### Import
 import pickle
-import numpy as np
-import pandas as pd
-import matplotlib.image as mpimg
-from sklearn.model_selection import train_test_split
-from sklearn.utils import shuffle
-from sklearn import preprocessing
 import cv2
 import math
 import time
 import h5py
 import json
 import os
+import numpy as np
+import pandas as pd
+import matplotlib.image as mpimg
 
+from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
+from sklearn import preprocessing
 
 from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
@@ -27,87 +27,77 @@ from keras.utils import np_utils
 # Read in CSV file
 csv_loc = "data/driving_log.csv"
 df = pd.read_csv(csv_loc)
-features_col = df['center']
-features_col = features_col.map(lambda x: x.lstrip('IMG/'))
-labels_col = df['steering']
-labels_col = labels_col.values.tolist()
-features_col = features_col.values.tolist()
+
+# Add c,l and r images.
+features_col = df['center', 'left', 'right']
+features_col = np.array(features_col.values.tolist(), dtype=np.float32)
+
+# Add steering angles for c,l,r with added shift for l and r images
+l_shift = 0.2
+r_shift = -0.2
+labels_col = df['steering', 'steering' + l_shift, 'steering' + r_shift]
+labels_col = np.array(labels_col.values.tolist(), dtype=np.float32)
 
 print("Length of Features: {0}, Labels: {1}".format(len(features_col), len(labels_col)))
 
-# Read in images
+# Split csv data
+features_col, labels_col = shuffle(features_col, labels_col)
+X_train, X_val, y_train, y_val = train_test_split(features_col, labels_col, test_size=0.15, random_state=42232) 
+
+# Read in image list
 images = os.listdir("data/IMG/")
-center_images = []
-
-for idx in range(len(features_col)):
-    # reading in an image
-	image = mpimg.imread("data/IMG/" + features_col[idx])
-	center_images.append(image)
-
-features = np.array(center_images)
-labels = np.array(labels_col)
-
-print("Length of Features: {0}, Labels: {1}".format(len(features), len(labels)))
-
-### Split data
-X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.15, random_state=432422)
-'''
-mpimg.imsave("pre_crop_test_1.jpg", X_train[0])
-mpimg.imsave("pre_crop_test_2.jpg", X_train[1])
-mpimg.imsave("pre_crop_test_3.jpg", X_train[50])
-'''
 
 ### Pre-Process
-# Resize
-def resize_img(image):
-    # And crop
-    image = image[60:140,40:280]
-    return cv2.resize(image, (160, 80))
-    
-# Normalize
-def normalize_img(image):
-	return cv2.normalize(image, None, alpha=-0.5, beta=0.5, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+img_rows = 160
+img_cols = 80
 
-X_train = np.array([resize_img(image) for image in X_train], dtype=np.float32)
-X_test = np.array([resize_img(image) for image in X_test], dtype=np.float32)
-'''
-mpimg.imsave("crop_test_1.jpg", X_train[0])
-mpimg.imsave("crop_test_2.jpg", X_train[1])
-mpimg.imsave("crop_test_3.jpg", X_train[50])
-'''
-X_train = np.array([normalize_img(image) for image in X_train], dtype=np.float32)
-X_test = np.array([normalize_img(image) for image in X_test], dtype=np.float32)
+def preprocess_image(image):
+    # Crop and resize
+    image = image[60:140,40:280]
+    image = cv2.resize(image, (img_rows, img_cols))
+    
+    # Normalize
+    image = cv2.normalize(image, None, alpha=-0.5, beta=0.5, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+    
+    return image
 
 ### Helper Functions
-'''
-def data_generator(train_features, train_labels, batch_size):
-	num_rows = int(len(train_features))
-	ctr = None
-	batch_x = np.zeros((batch_size, train_features.shape[1], train_features.shape[2], 3))
-    batch_y = np.zeros(batch_size)
-	while True:
-		print("In while")
-		for i in range(batch_size):
-			print("In for")
-			if ctr is None or ctr >= num_rows:
-				ctr = 0
-				train_features, train_labels = shuffle(train_features, train_labels)
 
-			batch_x[i] = train_features[i]
-			batch_y[i] = train_labels[i]
-			ctr += 1
-		print("Outside for and ctr: {0}".format(ctr))
-		yield (batch_x, batch_y)
-'''
-print("Test")
+def image_generator(csv_features, csv_labels, batch_size):
+    csv_features, csv_labels = shufle(csv_features, csv_labels)
+    for idx in range(len(csv_features)):
+        image = mpimg.imread("data/" + csv_features[idx])
+        image = preprocess_image(image)
+        label = csv_labels[idx]
+
+        yield image, label
+
+def data_generator(csv_features, csv_labels, batch_size):
+    num_rows = int(len(csv_features))
+    ctr = None
+    batch_x = np.zeros((batch_size, img_rows, img_cols, 3))
+    batch_y = np.zeros(batch_size)
+    while True:
+        print("In while")
+        for i in range(batch_size):
+            print("In for")
+            if ctr is None or ctr >= num_rows:
+                print("length of batch: {0}".format(len(batch_x)))
+                ctr = 0
+                new_feature, new_label = image_generator(csv_features, csv_labels)
+            batch_x[i], batch_y[i] = next(new_feature, new_label)
+            ctr += 1
+        
+        yield (batch_x, batch_y)
+
 print(X_train.shape[1:])
 	
 ### Parameters
 layer_1_depth = 24
 layer_2_depth = 36
 layer_3_depth = 48
-filter_size = 5
-num_classes = len(np.unique(y_train))
+filter_size_1 = 5
+filter_size_2 = 3
 num_neurons_1 = 512
 num_neurons_2 = 128
 epochs = 5
@@ -116,15 +106,15 @@ samples_per_epoch = X_train.shape[0]
  
 ### Model
 model = Sequential()
-model.add(Convolution2D(layer_1_depth, filter_size, filter_size, border_mode = 'valid', subsample = (2,2), input_shape = X_train.shape[1:]))
+model.add(Convolution2D(layer_1_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (2,2), input_shape = X_train.shape[1:]))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
-model.add(Convolution2D(layer_2_depth, filter_size, filter_size, border_mode = 'valid', subsample = (1,1)))
+model.add(Convolution2D(layer_2_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (1,1)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
-model.add(Convolution2D(layer_3_depth, 3, 3, border_mode = 'valid', subsample = (1,1)))
+model.add(Convolution2D(layer_3_depth, filter_size_2, filter_size_2, border_mode = 'valid', subsample = (1,1)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
@@ -140,32 +130,20 @@ model.add(Dense(1))
 
 model.summary()
 
-### Compile and Train
-#X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], X_train.shape[2],X_train.shape[3] )
-#X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], X_test.shape[3], X_test.shape[3])
-
 model.compile(loss='mse',
               optimizer=Adam(lr = 0.0001),
-              metrics=['mean_absolute_error', 'accuracy'])
+              metrics=['mean_absolute_error'])
 
 ### Save Model
 with open('model.json', 'w') as f:
-	json.dump(model.to_json(), f)
-with open('model_read.json', 'w') as f:
-	json.dump(json.loads(model.to_json()), f,
-			indent=4, separators=(',', ': '))
+	json.dump(model.to_json(), f)                                           
 
-
-history = model.fit(X_train, y_train,
-                    batch_size=batch_size, nb_epoch=epochs,
-                    verbose=1, validation_data=(X_test, y_test))                                            
-'''
 history = model.fit_generator(data_generator(X_train, y_train, batch_size), 
 											samples_per_epoch=samples_per_epoch, 
 											nb_epoch = epochs,
 											verbose = 1,
 											validation_data = (X_test, y_test))
-'''
+
 
 ### Save weights
 model.save_weights('model.h5')
