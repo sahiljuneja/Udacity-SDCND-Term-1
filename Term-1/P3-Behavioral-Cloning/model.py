@@ -57,7 +57,7 @@ img_rows = 80
 def preprocess_image(image):
     # Crop and resize
     image = image[60:140,40:280]
-    image = cv2.resize(image, (img_rows, img_cols))
+    image = cv2.resize(image, (img_cols, img_rows))
     
     # Normalize
     image = cv2.normalize(image, None, alpha=-0.5, beta=0.5, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
@@ -79,12 +79,12 @@ def image_generator(csv_features, csv_labels):
 def train_data_generator(csv_features, csv_labels, batch_size):
     num_rows = int(len(csv_features))
     ctr = None
-    batch_x = np.zeros((batch_size, img_cols, img_rows, 3))
+    batch_x = np.zeros((batch_size, img_rows, img_cols, 3))
     batch_y = np.zeros(batch_size)
     while True:
         
         for i in range(batch_size):
-            print("In for")
+            
             if ctr is None or ctr >= num_rows:
                 print("length of batch: {0}".format(len(batch_x)))
                 ctr = 0
@@ -100,9 +100,9 @@ def valid_data_generator(csv_features, csv_labels, batch_size):
     batch_x = np.zeros((batch_size, img_rows, img_cols, 3))
     batch_y = np.zeros(batch_size)
     while True:
-        print("In while")
+        
         for i in range(batch_size):
-            print("In for")
+            
             if ctr is None or ctr >= num_rows:
                 print("length of batch: {0}".format(len(batch_x)))
                 ctr = 0
@@ -128,7 +128,7 @@ samples_per_epoch = X_train.shape[0]
  
 ### Model
 model = Sequential()
-model.add(Convolution2D(layer_1_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (2,2), input_shape = (img_cols, img_rows, 3)))
+model.add(Convolution2D(layer_1_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (2,2), input_shape = (img_rows, img_cols, 3)))
 model.add(Activation('relu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
