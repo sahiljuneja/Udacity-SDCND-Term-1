@@ -6,6 +6,8 @@ import time
 import h5py
 import json
 import os
+import csv
+import random
 import numpy as np
 import pandas as pd
 import matplotlib.image as mpimg
@@ -33,8 +35,8 @@ features_col = pd.concat([df['center'], df['left'].map(str.strip), df['right'].m
 features_col = np.array(features_col.values.tolist())
 
 # Add steering angles for c,l,r with added shift for l and r images
-l_shift = 0.2
-r_shift = -0.2
+l_shift = 0.25
+r_shift = -0.25
 labels_c = df['steering']
 labels_r = df['steering'] + r_shift
 labels_l = df['steering'] + l_shift
@@ -51,10 +53,22 @@ X_train, X_val, y_train, y_val = train_test_split(features_col, labels_col, test
 images = os.listdir("data/IMG/")
 
 ### Pre-Process
-img_cols = 160
-img_rows = 80
+img_cols = 64
+img_rows = 64
 
-def preprocess_image(image):
+def data_trans(image, label):
+    trans_factor = 100*random.random() - 50 # Parameters set based on original image dimensions
+    trans_matrix = np.float32([[1,0,trans_factor],[0,1,trans_factor]])
+    image_trans = cv2.warpAffine(image,trans_matrix,(image.shape[0],image.shape[1]))
+    
+    label = label + trans_factor/25
+    
+    return image_tr,steer_ang
+    
+    
+def preprocess_data(image, label):
+    # Translate image and steering angle
+    image, label = data_trans(image, label)
     # Crop and resize
     image = image[60:140,40:280]
     image = cv2.resize(image, (img_cols, img_rows))
@@ -62,20 +76,23 @@ def preprocess_image(image):
     # Normalize
     image = cv2.normalize(image, None, alpha=-0.5, beta=0.5, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
     
-    return image
+    return image, label
 
 ### Helper Functions
 
 def image_generator(csv_features, csv_labels):
     csv_features, csv_labels = shuffle(csv_features, csv_labels)
+    
     for idx in range(len(csv_features)):
-        image = mpimg.imread("data/" + csv_features[idx])
-        image = preprocess_image(image)
-        #print("image shape: {0}".format(image.shape))
+        p = random.random()
         label = csv_labels[idx]
-
+        
+        image = mpimg.imread("data/" + csv_features[idx])
+        image, label = preprocess_data(image, label)
+        
         yield image, label
 
+epoch_labels = []
 def train_data_generator(csv_features, csv_labels, batch_size):
     num_rows = int(len(csv_features))
     ctr = None
@@ -91,7 +108,7 @@ def train_data_generator(csv_features, csv_labels, batch_size):
                 images = image_generator(csv_features, csv_labels)
             batch_x[i], batch_y[i] = next(images)
             ctr += 1
-        
+
         yield (batch_x, batch_y)
 
 def valid_data_generator(csv_features, csv_labels, batch_size):
@@ -115,39 +132,41 @@ def valid_data_generator(csv_features, csv_labels, batch_size):
 print(X_train.shape)
 	
 ### Parameters
-layer_1_depth = 24
-layer_2_depth = 36
-layer_3_depth = 48
-filter_size_1 = 5
+layer_1_depth = 32
+layer_2_depth = 48
+layer_3_depth = 64
+filter_size_1 = 3
 filter_size_2 = 3
 num_neurons_1 = 512
 num_neurons_2 = 128
-epochs = 5
+epochs = 3
 batch_size = 64
 samples_per_epoch = X_train.shape[0]
  
 ### Model
 model = Sequential()
-model.add(Convolution2D(layer_1_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (2,2), input_shape = (img_rows, img_cols, 3)))
-model.add(Activation('relu'))
+model.add(Convolution2D(layer_1_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (1,1), input_shape = (img_rows, img_cols, 3)))
+model.add(Activation('elu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
 model.add(Convolution2D(layer_2_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (1,1)))
-model.add(Activation('relu'))
+model.add(Activation('elu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
-model.add(Convolution2D(layer_3_depth, filter_size_2, filter_size_2, border_mode = 'valid', subsample = (1,1)))
-model.add(Activation('relu'))
+model.add(Convolution2D(layer_3_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (1,1)))
+model.add(Activation('elu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
 
 model.add(Flatten())
 model.add(Dense(num_neurons_1))
-model.add(Activation('relu'))
+model.add(Activation('elu'))
 model.add(Dropout(0.5))
 model.add(Dense(num_neurons_2))
-model.add(Activation('relu'))
+model.add(Activation('elu'))
 model.add(Dropout(0.5))
+model.add(Dense(32))
+model.add(Activation('elu'))
 model.add(Dense(1))
 
 model.summary()
