@@ -53,25 +53,30 @@ X_train, X_val, y_train, y_val = train_test_split(features_col, labels_col, test
 images = os.listdir("data/IMG/")
 
 ### Pre-Process
-img_cols = 64
-img_rows = 64
+img_cols = 120
+img_rows = 60
 
 def data_trans(image, label):
-    trans_factor = 100*random.random() - 50 # Parameters set based on original image dimensions
+    trans_factor = 50*np.random.uniform() - 25 # Parameters set based on original image dimensions
     trans_matrix = np.float32([[1,0,trans_factor],[0,1,trans_factor]])
-    image_trans = cv2.warpAffine(image,trans_matrix,(image.shape[0],image.shape[1]))
+    image_trans = cv2.warpAffine(image,trans_matrix,(image.shape[1],image.shape[0]))
+
+    label = label + trans_factor/120
+    #print(label)
     
-    label = label + trans_factor/25
-    
-    return image_tr,steer_ang
+    return image_trans, label
     
     
-def preprocess_data(image, label):
-    # Translate image and steering angle
-    image, label = data_trans(image, label)
-    # Crop and resize
-    image = image[60:140,40:280]
+def preprocess_data(image, label, flag):
+    # Crop Image
+    image = image[60:140,:]
+    
+    # Resize
     image = cv2.resize(image, (img_cols, img_rows))
+    
+    # Translate image and steering angle
+    if flag == "TRAIN":
+        image, label = data_trans(image, label)
     
     # Normalize
     image = cv2.normalize(image, None, alpha=-0.5, beta=0.5, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
@@ -80,16 +85,21 @@ def preprocess_data(image, label):
 
 ### Helper Functions
 
-def image_generator(csv_features, csv_labels):
+def image_generator(csv_features, csv_labels, flag):
     csv_features, csv_labels = shuffle(csv_features, csv_labels)
-    
+    p = 1000
     for idx in range(len(csv_features)):
-        p = random.random()
+        
         label = csv_labels[idx]
         
         image = mpimg.imread("data/" + csv_features[idx])
-        image, label = preprocess_data(image, label)
-        
+        image, label = preprocess_data(image, label, flag)
+        ''' 
+        if  p < 1020 and flag == "TRAIN":
+            mpimg.imsave("image" + str(p),image)
+            print(label)
+            p += 1
+        '''
         yield image, label
 
 epoch_labels = []
@@ -105,7 +115,7 @@ def train_data_generator(csv_features, csv_labels, batch_size):
             if ctr is None or ctr >= num_rows:
                 print("length of batch: {0}".format(len(batch_x)))
                 ctr = 0
-                images = image_generator(csv_features, csv_labels)
+                images = image_generator(csv_features, csv_labels, "TRAIN")
             batch_x[i], batch_y[i] = next(images)
             ctr += 1
 
@@ -123,7 +133,7 @@ def valid_data_generator(csv_features, csv_labels, batch_size):
             if ctr is None or ctr >= num_rows:
                 print("length of batch: {0}".format(len(batch_x)))
                 ctr = 0
-                images = image_generator(csv_features, csv_labels)
+                images = image_generator(csv_features, csv_labels, "VALID")
             batch_x[i], batch_y[i] = next(images)
             ctr += 1
         
@@ -133,27 +143,27 @@ print(X_train.shape)
 	
 ### Parameters
 layer_1_depth = 32
-layer_2_depth = 48
-layer_3_depth = 64
-filter_size_1 = 3
+layer_2_depth = 64
+layer_3_depth = 128
+filter_size_1 = 5
 filter_size_2 = 3
 num_neurons_1 = 512
 num_neurons_2 = 128
-epochs = 3
+epochs = 1
 batch_size = 64
 samples_per_epoch = X_train.shape[0]
  
 ### Model
 model = Sequential()
-model.add(Convolution2D(layer_1_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (1,1), input_shape = (img_rows, img_cols, 3)))
+model.add(Convolution2D(layer_1_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (2,2), input_shape = (img_rows, img_cols, 3)))
 model.add(Activation('elu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
-model.add(Convolution2D(layer_2_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (1,1)))
+model.add(Convolution2D(layer_2_depth, filter_size_2, filter_size_2, border_mode = 'valid', subsample = (1,1)))
 model.add(Activation('elu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
-model.add(Convolution2D(layer_3_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (1,1)))
+model.add(Convolution2D(layer_3_depth, filter_size_2, filter_size_2, border_mode = 'valid', subsample = (1,1)))
 model.add(Activation('elu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
@@ -167,6 +177,7 @@ model.add(Activation('elu'))
 model.add(Dropout(0.5))
 model.add(Dense(32))
 model.add(Activation('elu'))
+model.add(Dropout(0.5))
 model.add(Dense(1))
 
 model.summary()
