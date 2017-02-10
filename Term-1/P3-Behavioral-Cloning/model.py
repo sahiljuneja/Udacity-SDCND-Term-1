@@ -29,7 +29,9 @@ from keras.utils import np_utils
 # Read in CSV file
 csv_loc = "data/driving_log.csv"
 df = pd.read_csv(csv_loc)
-
+df = df.drop(df[df['steering'] == 0].sample(frac=0.60).index)
+df = df.drop(df[df['throttle'] < 0.25].sample(frac=0.50).index)
+print(len(df.index))
 # Add c,l and r images.
 features_col = pd.concat([df['center'], df['left'].map(str.strip), df['right'].map(str.strip)])
 features_col = np.array(features_col.values.tolist())
@@ -149,13 +151,13 @@ filter_size_1 = 5
 filter_size_2 = 3
 num_neurons_1 = 512
 num_neurons_2 = 128
-epochs = 1
+epochs = 3
 batch_size = 64
 samples_per_epoch = X_train.shape[0]
  
 ### Model
 model = Sequential()
-model.add(Convolution2D(layer_1_depth, filter_size_1, filter_size_1, border_mode = 'valid', subsample = (2,2), input_shape = (img_rows, img_cols, 3)))
+model.add(Convolution2D(layer_1_depth, filter_size_2, filter_size_2, border_mode = 'valid', subsample = (2,2), input_shape = (img_rows, img_cols, 3)))
 model.add(Activation('elu'))
 model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.5))
