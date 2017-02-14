@@ -149,7 +149,7 @@ There were couple prominent additions that I made.
 The results of the above pipeline led to some missing frames and a lot of jittery bounding boxes.
 
 To reduce the jitter I added a weighted moving average, defined by - 
-`heatmap_image = prev_heatmap * heatmap_factor + heatmap_image * (1 - heatmap_factor)` where the heatmap_factor was set to `0.75` after a bit of experimentation. 
+`heatmap_image = prev_heatmap * heatmap_factor + heatmap_image * (1 - heatmap_factor)` where the heatmap_factor was set to `0.9` after a bit of experimentation. 
 
 The `prev_heatmap` was stored in a global variable. The new heatmap image was then thresholded again. 
 
@@ -158,7 +158,7 @@ That would have made a lot of good changes. But fine-tuning that is more time-co
 
 Instead I decided to keep track of the last N frames, for which I added up the heatmaps. I then thresholded this heatmap and again fed it to the weighted moving average equation above.
 
-The results I obtained were quite good as you can see from the video.
+The results I obtained were better than before as you can see from the video.
 
 
 ---
