@@ -156,7 +156,7 @@ The `prev_heatmap` was stored in a global variable. The new heatmap image was th
 This resulted in  some good results, but I was still missing detection at some frames. Now, the best solution would have been to go tinker around with the sliding window sizes.
 That would have made a lot of good changes. But fine-tuning that is more time-consuming as per me.
 
-Instead I decided to keep track of the last N frames, for which I added up the heatmaps. I then thresholded this heatmap and again fed it to the weighted moving average equation above.
+Instead I decided to keep track of the last 15 frames, for which I added up the heatmaps. I then thresholded this heatmap and again fed it to the weighted moving average equation above.
 
 The results I obtained were better than before as you can see from the video.
 
