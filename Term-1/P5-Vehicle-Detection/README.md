@@ -95,12 +95,12 @@ I noticed that I could perhaps get better results with smaller window sizes, and
 The current configuration allowed me for quick testing on the final video as well (mostly 1.5 to 2 fps) while not sacrificing too much on the results. Although there are small spots
 where one of the cars wasn't tracked too well. 
 
-| Window Sizes	| Overlap	  |
-| -------------	| ------------|
-| 64 x 64		| (0.5, 0.5)  |
-| 120 x 120		| (0.75, 0.75)|
-| 140 x 140		| (0.75, 0.75)|
-| 160 x 160		| (0.75, 0.75)|
+| Window Sizes	| X-range	    | Y-range	    | Overlap	    |
+|:-------------:|:-------------:|:-------------:|:-------------:|
+| 64 x 64		| (640, 1280)   | (360, 450)   	| (0.5, 0.5)	|
+| 120 x 120		| (640, 1280)	| (360, 450)   	| (0.75, 0.75)	|
+| 140 x 140		| (640, 1280)	| (400, 514)   	| (0.75, 0.75)	|
+| 160 x 160		| (640, 1280)	| (450, 600)   	| (0.75, 0.75)	|
 
 I further restrained the windows to just the right half of the image/frame. This does limit my model performing well for only this specific project video, but it was immensely helpful 
 in reducing false positives.
