@@ -95,7 +95,10 @@ I noticed that I could perhaps get better results with smaller window sizes, and
 The current configuration allowed me for quick testing on the final video as well (mostly 1.5 to 2 fps) while not sacrificing too much on the results. Although there are small spots
 where one of the cars wasn't tracked too well. 
 
-The following are the sliding windows overlayed on a test image.
+I further restrained the windows to just the right half of the image/frame. This does limit my model performing well for only this specific project video, but it was immensely helpful 
+in reducing false positives.
+
+The following displays the sliding windows overlayed on a test image.
 
 ![alt text][image3]
 
@@ -103,9 +106,23 @@ The next section covers the remaining pipeline for individual images.
 
 ####2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to try to minimize false positives and reliably detect cars?
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+In `code cell 10` of the notebook, I run my pipeline for individual test images. I initially defined the sliding windows I discuss above. I then call the `search_windows` function which
+was defined in the `9th cell` of the notebook. This function (based off of the functions we covered in the course) identifies windows in the image(s) where the classifier detects a vehicle.
 
+Following are the results of the above.
 ![alt text][image4]
+
+I then created a heatmap that takes in the bounding boxes per image, and for those regions in a new blank image, adds a constant value for every box. This results in identifying where
+the classifier predicts the highest probability of a car being present in the image. However, there are still some false positives with this heatmap. As a result, a thresholding operation
+is carried out to reduce those. Following is the result of this process -
+
+![alt text][image5]
+
+The result of `scipy.ndimage.measurements.label()` labels the regions that are connected together in the thresholded heatmap. Using this result, a bounding box is drawn around the detected
+vehicle using the `draw_labeled_bboxes` function defined in `code cell 9`. Here are the results of this pipeline on the test images.
+
+![alt text][image6]
+
 ---
 
 ### Video Implementation
@@ -122,13 +139,13 @@ Here's an example result showing the heatmap from a series of frames of video, t
 
 ### Here are six frames and their corresponding heatmaps:
 
-![alt text][image5]
+
 
 ### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
+
 
 ### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
+
 
 
 
