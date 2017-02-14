@@ -17,9 +17,9 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 [image1]: ./output_images/sample_images.png
-[image2]: ./output_images/hog_outputs.jpg
-[image3]: ./output_images/sliding_window_sizes_image.jpg
-[image4]: ./output_images/sliding_window_test_images.jpg
+[image2]: ./output_images/hog_outputs.png
+[image3]: ./output_images/sliding_window_sizes_image.png
+[image4]: ./output_images/sliding_window_test_images.png
 [image5]: ./output_images/thresholded_heatmap.png
 [image6]: ./output_images/labeled_test_images.png
 [video1]: project_video_processed.mp4
