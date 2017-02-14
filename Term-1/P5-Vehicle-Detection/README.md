@@ -57,9 +57,20 @@ The code for this is contained in the `seventh code cell` of the notebook.
 
 ####2. Explain how you settled on your final choice of HOG parameters.
 
-I tried various combinations of parameters and... I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
+I iterated over several colorspaces without much changes to the different parameters required for `skimage's hog method`. I based my selection eventually on the test set accuracy I achieved
+after training my classifier. This isn't a very robust metric, but coupled with observing the results of searching and classifying vehicles in the test images, the following parameters yielded
+good results. These parameters are defined in the `fifth code cell` in the notebook.
 
-Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
+* cspace = 'HSV'
+* spatial_size = (16, 16)
+* hist_bins = 32
+* hist_range = (0, 256)
+* orient = 8
+* pix_per_cell = 8
+* cell_per_block = 2
+* hog_channel = "ALL"
+
+Here is an example using the `HSV` color space, all channels, and HOG features extracted based on the above parameters.
 
 
 ![alt text][image2]
