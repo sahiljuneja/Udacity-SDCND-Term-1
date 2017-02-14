@@ -16,12 +16,12 @@ The goals / steps of this project are the following:
 * Estimate a bounding box for vehicles detected.
 
 [//]: # (Image References)
-[image1]: /output_images/sample_images.png
-[image2]: /output_images/hog_outputs.jpg
-[image3]: /output_images/sliding_window_sizes_image.jpg
-[image4]: /output_images/sliding_window_test_images.jpg
-[image5]: /output_images/thresholded_heatmap.png
-[image6]: /output_images/labeled_test_images.png
+[image1]: ./output_images/sample_images.png
+[image2]: ./output_images/hog_outputs.jpg
+[image3]: ./output_images/sliding_window_sizes_image.jpg
+[image4]: ./output_images/sliding_window_test_images.jpg
+[image5]: ./output_images/thresholded_heatmap.png
+[image6]: ./output_images/labeled_test_images.png
 [video1]: project_video_processed.mp4
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
@@ -31,7 +31,7 @@ The goals / steps of this project are the following:
 
 ###Writeup / README
 
-####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  [Here](https://github.com/udacity/CarND-Vehicle-Detection/blob/master/writeup_template.md) is a template writeup for this project you can use as a guide and a starting point.  
+####1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  
 
 You're reading it!
 
