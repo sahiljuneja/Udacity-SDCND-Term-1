@@ -58,7 +58,7 @@ The code for this is contained in the `seventh code cell` of the notebook.
 ####2. Explain how you settled on your final choice of HOG parameters.
 
 I iterated over several colorspaces without much changes to the different parameters required for `skimage's hog method`. I based my selection eventually on the test set accuracy I achieved
-after training my classifier. This isn't a very robust metric, but coupled with observing the results of searching and classifying vehicles in the test images, the following parameters yielded
+after training my classifier. This isn't a very robust metric to identify what combination would work the best, but coupled with observing the results of searching and classifying vehicles in the test images, the following parameters yielded
 good results. These parameters are defined in the `fifth code cell` in the notebook.
 
 * cspace = 'HSV'
@@ -77,15 +77,29 @@ Here is an example using the `HSV` color space, all channels, and HOG features e
 
 ####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-I trained a linear SVM using...
+Once I obtained my training and test set from extracted features, as explained above, I utilized `sklearn's Linear Support Vector Classification (LinearSVC)` to train a classifier.
+This was implemented in the `8th code cell` of the notebook, and I obtained a test accuracy of 99.07%
 
 ###Sliding Window Search
 
 ####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
+All of the helper functions for this section are available in the `9th code cell` of the notebook.
+
+This part of the algorithm took up quite a bit of trial and error, and after a while it became obvious that there could be numerous configurations and the window size and the overlap
+were important for the entire pipeline to perform well, perhaps even more so than fine-tuning the classifier after a point.
+
+I went for a big tradeoff here. I decided to go for relatively big window sizes, with a 0.75 overlap for all of them. The tradeoff here was in terms of processing speed.
+I noticed that I could perhaps get better results with smaller window sizes, and higher overlap than this, but that resulted in my video processing times to be quite high (even hours). 
+
+The current configuration allowed me for quick testing on the final video as well (mostly 1.5 to 2 fps) while not sacrificing too much on the results. Although there are small spots
+where one of the cars wasn't tracked too well. 
+
+The following are the sliding windows overlayed on a test image.
 
 ![alt text][image3]
+
+The next section covers the remaining pipeline for individual images.
 
 ####2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to try to minimize false positives and reliably detect cars?
 
