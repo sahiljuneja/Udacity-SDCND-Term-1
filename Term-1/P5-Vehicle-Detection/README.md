@@ -95,6 +95,13 @@ I noticed that I could perhaps get better results with smaller window sizes, and
 The current configuration allowed me for quick testing on the final video as well (mostly 1.5 to 2 fps) while not sacrificing too much on the results. Although there are small spots
 where one of the cars wasn't tracked too well. 
 
+| Window Sizes	| Overlap	  |
+| -------------	| ------------|
+| 64 x 64		| (0.5, 0.5)  |
+| 120 x 120		| (0.75, 0.75)|
+| 140 x 140		| (0.75, 0.75)|
+| 160 x 160		| (0.75, 0.75)|
+
 I further restrained the windows to just the right half of the image/frame. This does limit my model performing well for only this specific project video, but it was immensely helpful 
 in reducing false positives.
 
@@ -128,7 +135,7 @@ vehicle using the `draw_labeled_bboxes` function defined in `code cell 9`. Here 
 ### Video Implementation
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./project_video.mp4) named `project_video_result.mp4` [also attached].
 
 
 ####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
