@@ -135,25 +135,30 @@ vehicle using the `draw_labeled_bboxes` function defined in `code cell 9`. Here 
 ### Video Implementation
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4) named `project_video_result.mp4` [also attached].
+Here's a [link to my video result](./project_video_result.mp4) named `project_video_result.mp4` [also attached].
 
 
 ####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
+The code for the video pipeline in the `process_video` function in the `11th code cell` of the notebook. 
 
-Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
+Most of the pipeline that I implemented for the individual images above was utilized for the video as well. 
 
-### Here are six frames and their corresponding heatmaps:
+There were couple prominent additions that I made. 
 
+The results of the above pipeline led to some missing frames and a lot of jittery bounding boxes.
 
+To reduce the jitter I added a weighted moving average, defined by - 
+`heatmap_image = prev_heatmap * heatmap_factor + heatmap_image * (1 - heatmap_factor)` where the heatmap_factor was set to `0.75` after a bit of experimentation. 
 
-### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
+The `prev_heatmap` was stored in a global variable. The new heatmap image was then thresholded again. 
 
+This resulted in  some good results, but I was still missing detection at some frames. Now, the best solution would have been to go tinker around with the sliding window sizes.
+That would have made a lot of good changes. But fine-tuning that is more time-consuming as per me.
 
-### Here the resulting bounding boxes are drawn onto the last frame in the series:
+Instead I decided to keep track of the last N frames, for which I added up the heatmaps. I then thresholded this heatmap and again fed it to the weighted moving average equation above.
 
-
+The results I obtained were quite good as you can see from the video.
 
 
 ---
@@ -162,4 +167,11 @@ Here's an example result showing the heatmap from a series of frames of video, t
 
 ####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+Most of the problems or issues with the implementation was tuning the parameters and finding the right combinations. Furthermore, a more robust solution would not work in real-time.
+
+The results I get aren't perfect, of course.
+* Using global variables is bad programming practice as per me. I next plan to implement a proper class to handle the detection parts.
+* My implementation doesn't generalize well on any other video. Primary improvement area as per me would be the sliding window sizes, or using a DL based approach in it's entirety. 
+* Current implementation can't distinguish between the cars when one eclipses the other. 
+
+I strongly believe a DL approach would be better for this project. Or at the very least, more relevant dataset to help generalize the classification process.
