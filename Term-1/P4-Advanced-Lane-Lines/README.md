@@ -18,7 +18,7 @@ The goals / steps of this project are the following:
 [image2]: ./output_images/test1.png "Road Original"
 [image3]: ./output_images/undist_test_image.png "Road Undistorted"
 [image4]: ./output_images/persp_transform.png "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
+[image5]: ./output_images/thresholded_image.png "Thresholded Image"
 [image6]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
 
@@ -87,12 +87,21 @@ the corners of the image, they aren't visible as such.
 Initially I tried to utilize both color and sobel based thresholding to obtain a binary thresholded image. However sobel thresholding required a lot of fine-tuning to produce noise
 free results. So instead, I just stuck with color thresholding. I started to experiment with some colorspaces initially, but since that was time consuming, I decided to implement an 
 interactive slider using OpenCV's `createTrackbar`. The code for this is in the `last code cell` of the notebook, currently commented out [since it was for quick testing only]. 
+
 This helped me focus on different colorspaces quickly and identify the threshold ranges as well. Based on this, and thanks to discussions with Justin Heaton [a fellow student in the ND], I ended up
 focusing on the S Channel of HLS, the L channel of LUV, and the B channel of LAB. Eventually I dropped the S channel of HLS (another suggestion thanks to Justin) since it was not robust
-to the shadows in certain parts of the video.
+to the shadows in certain parts of the video. The `color_threshold` function in `Code Cell 4` of the notebook implements the above and outputs a thresholded binary image.
+
+| Colorspace      | Channel   | Thresholds	 |
+|:---------------:|:---------:| :-----------:|
+| HLS (not used)  | S     	  | (180, 255)	 |
+| LUV 		      | L		  | (225, 255)   |
+| LAB   		  | B         | (150, 255)   |
+
+Following is the binary image I obtained
 
 
-![alt text][image3]
+![alt text][image5]
 
 
 
