@@ -49,7 +49,7 @@ Thus,`objpoints` will be appended with a copy of a replicated array of coordinat
 
 `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
 
-In `Code Cell 4` the `objpoints` and `imgpoints` are passed into OpenCV's `cv2.calibrateCamera()` function, which computes thecamera calibration and distortion coefficients.
+In `Code Cell 4` the `objpoints` and `imgpoints` are passed into OpenCV's `cv2.calibrateCamera()` function, which computes the camera calibration and distortion coefficients.
 
 I then use these coefficients and undistort a test image using OpenCV's `cv2.undistort()` function. Following is the result of that - 
 
@@ -60,10 +60,8 @@ The code for the following section is in the `Advanced_Lane_Finding.ipynb` Jupyt
 
 ####1. Provide an example of a distortion-corrected image.
 The camera matrix and distortion coefficients obtained above were used to correct for distortion in test images and the video frames. Following is a sample of that process -
-| Original			  | Undistorted	       | 
-|:-------------------:|:------------------:| 
-| ![alt text][image2] |![alt text][image3] |
 
+![alt text][image3]
 
 ####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
