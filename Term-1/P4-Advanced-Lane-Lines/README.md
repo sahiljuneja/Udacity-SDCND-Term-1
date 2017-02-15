@@ -17,7 +17,7 @@ The goals / steps of this project are the following:
 [image1]: ./output_images/undist_calib_image.png "Undistorted"
 [image2]: ./output_images/test1.png "Road Original"
 [image3]: ./output_images/undist_test_image.png "Road Undistorted"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
+[image4]: ./output_images/persp_transform.png "Warp Example"
 [image5]: ./examples/color_fit_lines.jpg "Fit Visual"
 [image6]: ./examples/example_output.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
@@ -63,40 +63,38 @@ The camera matrix and distortion coefficients obtained above were used to correc
 
 ![alt text][image3]
 
-####2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+####2. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
+
+In `Code Cell 5` of the notebook, I implemented the `perspective_transform()` and the `undist_img()` functions. The `undist_img` function took in the original image, and undistorted it
+and also outputted the source and destination points based on the image dimensions, that were later utilized to obtain a transform using OpenCV's `getPerspectiveTransform()` function.
+
+The resulting source and destination points:
+
+| Source        | Destination   | 
+|:-------------:|:-------------:| 
+| (0, 720)      | (0, 720)      | 
+| (480, 480)    | (0, 0)      	|
+| (800, 480)    | (720, 0)      |
+| (1280, 720)   | (1280, 720)   |
+
+The above transform was then used to warp the undistorted image, using OpenCV's `warpPerspective()` function, into a bird's eye view as seen below. Since the destination points, are
+the corners of the image, they aren't visible as such.
+
+![alt text][image4]
+
+####3. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+
+Initially I tried to utilize both color and sobel based thresholding to obtain a binary thresholded image. However sobel thresholding required a lot of fine-tuning to produce noise
+free results. So instead, I just stuck with color thresholding. I started to experiment with some colorspaces initially, but since that was time consuming, I decided to implement an 
+interactive slider using OpenCV's `createTrackbar`. The code for this is in the `last code cell` of the notebook, currently commented out [since it was for quick testing only]. 
+This helped me focus on different colorspaces quickly and identify the threshold ranges as well. Based on this, and thanks to discussions with Justin Heaton [a fellow student in the ND], I ended up
+focusing on the S Channel of HLS, the L channel of LUV, and the B channel of LAB. Eventually I dropped the S channel of HLS (another suggestion thanks to Justin) since it was not robust
+to the shadows in certain parts of the video.
 
 
 ![alt text][image3]
 
-####3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
-
-```
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
-
-```
-This resulted in the following source and destination points:
-
-| Source        | Destination   | 
-|:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
-
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
-
-![alt text][image4]
 
 ####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
