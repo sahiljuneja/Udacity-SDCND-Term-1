@@ -19,8 +19,11 @@ The goals / steps of this project are the following:
 [image3]: ./output_images/undist_test_image.png "Road Undistorted"
 [image4]: ./output_images/persp_transform.png "Warp Example"
 [image5]: ./output_images/thresholded_image.png "Thresholded Image"
-[image6]: ./examples/example_output.jpg "Output"
-[video1]: ./project_video.mp4 "Video"
+[image6]: ./output_images/histogram_plot.png "Histogram"
+[image7]: ./output_images/sliding_window.png "Sliding Window"
+[image8]: ./output_images/thresholded_image_lane_lines.png "Lane Lines"
+[image9]: ./output_images/final_image.png "Final Image"
+[video1]: ./project_output.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 ###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -90,7 +93,8 @@ interactive slider using OpenCV's `createTrackbar`. The code for this is in the 
 
 This helped me focus on different colorspaces quickly and identify the threshold ranges as well. Based on this, and thanks to discussions with Justin Heaton [a fellow student in the ND], I ended up
 focusing on the S Channel of HLS, the L channel of LUV, and the B channel of LAB. Eventually I dropped the S channel of HLS (another suggestion thanks to Justin) since it was not robust
-to the shadows in certain parts of the video. The `color_threshold` function in `Code Cell 4` of the notebook implements the above and outputs a thresholded binary image.
+to the shadows in certain parts of the video. The `color_threshold` function in `Code Cell 4` of the notebook implements the above and outputs a thresholded binary image. This function
+is called in the `thresholded_img()` function in `Code Cell 6`.
 
 | Colorspace      | Channel   | Thresholds	 |
 |:---------------:|:---------:| :-----------:|
@@ -107,9 +111,27 @@ Following is the binary image I obtained
 
 ####4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+In `Code Cell 7`, the `line_coords()` function calculated the histogram of 10 equally sized sections of the thresholded image. For each section I identify the histogram peaks and the
+corresponding coordinates, and filter out some of the noise. Here is the histogram of the thresholded image
+shown above - 
 
-![alt text][image5]
+![alt text][image6]
+
+The indices obtained above were then utilized to implement a sliding window approach, where each window was utilized to identify which pixels are white, and the pixel coordinates were
+then stored in variables corresponding to each lane. Following is an implementation of the sliding window to identify lane points - 
+
+![alt text][image7]
+
+In `Code Cell 9`, the `identify_lane()` function, the pixel coordinates obtained above are used to fit a 2nd order polynomial (using `numpy's polyfit` funtion) to obtain the left and right lane lines. These lane lines
+are then extrapolated based on the image dimensions. Following are the lane lines drawn over the thresholded image.
+
+![alt text][image8]
+
+For the video, previous 20 frames were saved (using global variables) and averaged over, to replace the right lane line in any frame where there were very few lane points being detected. This helped
+to smooth out any aberrations.
+
+In `Code Cell 13`, the `draw_lane_line()` function drew the lane lines and filled the lane area using OpenCV's `polylines()` and `fillPoly()` functions on top of a blank image.
+This image was then unwarped using OpenCV's `warpPerspective()` function. The output of this is shown in the 6th step below.
 
 ####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
