@@ -141,14 +141,17 @@ The radius of curvature and the position of vehicle are implemented in the funct
 Since we are working with images, to obtain the radius of curvature, pixel length needs to be converted into meters. Which is done based on the following -
 
 `ym_per_pix = 30/720 # meters per pixel in y dimension`
+
 `xm_per_pix = 3.7/700 # meteres per pixel in x dimension`
 
 A second order polynomial is then fit to the lane pixels converted to meters. The following equation then obtains the radius of curvature using the polynomial fit and the lowest y-coordinate
 of the lane in the image (which is numerically the maximum). 
+
 `rad_curvature = ((1 + (2*new_fit[0]*y_eval + new_fit[1])**2)**1.5)/np.absolute(2*new_fit[0])`
 
 To calculate the distance of the car from the middle of the lane, the middle of the two lane lines is calculated (using the bottommost points of the lanes)
 and the image center is subtracted from this. The result is multiplied by `xm_per_pix` defined above to obtain the offset in meters. Following is the equation for this -
+
 `car_pos = ((left_lane[-1] + right_lane[-1])//2 - img_center[0]) * xm_per_pix`
 
 The above values are then overlayed as text on every video frame in the `draw_lane_line()` function of `Code Cell 13` using OpenCV's `putText()` function.
