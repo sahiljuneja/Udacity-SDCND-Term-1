@@ -22,7 +22,7 @@ The goals / steps of this project are the following:
 [image6]: ./output_images/histogram_plot.png "Histogram"
 [image7]: ./output_images/sliding_window.png "Sliding Window"
 [image8]: ./output_images/thresholded_image_lane_lines.png "Lane Lines"
-[image9]: ./output_images/final_image.png "Final Image"
+[image9]: ./output_images/final_image.jpg "Final Image"
 [video1]: ./project_output.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
