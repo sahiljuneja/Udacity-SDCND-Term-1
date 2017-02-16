@@ -44,6 +44,7 @@ In `Code Cell 2` of this notebook, I define the number of inner corners (9x6) in
 library, each image is converted to grayscale and passed to OpenCV's `findChessboardCorners` function which outputs the corners of each square (inner) in the chessboard.
 
 [The following explanation is provided by Udacity and explains the process quite well]
+
 For every image, two lists, `objpoints` and `imgpoints` are updated. 
 
 The `objpoints` contains the (x, y, z) coordinates of the chessboard corners in the world. 
@@ -135,13 +136,28 @@ This image was then unwarped using OpenCV's `warpPerspective()` function. The ou
 
 ####5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+The radius of curvature and the position of vehicle are implemented in the functions `lane_curvature()` defined in `Code Cell 11` and `distance_from_lane()` defined in `Code Cell 12`.
+
+Since we are working with images, to obtain the radius of curvature, pixel length needs to be converted into meters. Which is done based on the following -
+
+`ym_per_pix = 30/720 # meters per pixel in y dimension`
+`xm_per_pix = 3.7/700 # meteres per pixel in x dimension`
+
+A second order polynomial is then fit to the lane pixels converted to meters. The following equation then obtains the radius of curvature using the polynomial fit and the lowest y-coordinate
+of the lane in the image (which is numerically the maximum). 
+`rad_curvature = ((1 + (2*new_fit[0]*y_eval + new_fit[1])**2)**1.5)/np.absolute(2*new_fit[0])`
+
+To calculate the distance of the car from the middle of the lane, the middle of the two lane lines is calculated (using the bottommost points of the lanes)
+and the image center is subtracted from this. The result is multiplied by `xm_per_pix` defined above to obtain the offset in meters. Following is the equation for this -
+`car_pos = ((left_lane[-1] + right_lane[-1])//2 - img_center[0]) * xm_per_pix`
+
+The above values are then overlayed as text on every video frame in the `draw_lane_line()` function of `Code Cell 13` using OpenCV's `putText()` function.
 
 ####6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+Here is the output of the above pipeline on a specific frame of the video -
 
-![alt text][image6]
+![alt text][image9]
 
 ---
 
@@ -149,7 +165,7 @@ I implemented this step in lines # through # in my code in `yet_another_file.py`
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./project_output.mp4) named `project_output.mp4` [also attached]. The entire pipeline is run through the `process_video()` function in `Code Cell 15`.
 
 ---
 
@@ -157,5 +173,14 @@ Here's a [link to my video result](./project_video.mp4)
 
 ####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+The major issues faced in implementing this project were to find the correct parameters for thresholding. The pipeline is quite specific to the project video since currently I am
+only averaging over previous frames for the right lane. Under heavy shadows this pipeling doesn't perform well.
+
+There are several ways to make this more robust -
+* A better Class structure for each Lane Line to help keep track of previous N frames.
+* Better tuning for gradient based thresholding, exploring different colorspaces.
+* Improved perspective transform by not hardcoding the source and destination points. One option is to use hough's transform to identify lanes in a test image and use their end points.
+
+
+
 
