@@ -225,29 +225,37 @@ Following are the bar charts that further describe the above probabilities.
 
 * Image 0: Ground truth is a "Pedestrians Crossings" image, whereas the model classifies it incorrectly as a "Speed Limit (70kmph)" sign with a 0.97 probability. This is not surprising
 given the few data points for this class in our dataset.
+
 ![alt text][image7]
 
-* Image 1: Ground truth is a "Slippery Road" image, and the model classifies it correctly as a "Slippery Road" sign with a full confidence (1.0 probability). 
+* Image 1: Ground truth is a "Slippery Road" image, and the model classifies it correctly as a "Slippery Road" sign with a full confidence (1.0 probability).
+ 
 ![alt text][image8]
 
 * Image 2: Ground truth is a "Yield" image, and the model classifies it correctly as a "Yield" sign with a full confidence (1.0 probability).
+
 ![alt text][image9]
 
 * Image 3: Ground truth is a "Do Not Enter" image, and the model classifies it correctly as a "Do Not Enter" sign with a full confidence (1.0 probability).
+
 ![alt text][image10]
 
 * Image 4: Ground truth is a "Speed Limit (50kmph)" image, whereas the model classifies it incorrectly as a "Speed Limit (80kmph)" sign with a 0.9 probability. As per the confusion matrix,
 the model didn't learn well from the "Speed Limit" images. Perhaps better dataset (and augmentation) would help here.
+
 ![alt text][image11]
 
 * Image 5: Ground truth is a "Bike Crossings" image, whereas the model classifies it incorrectly as a "Stop" sign with a 0.98 probability. This is not surprising
 given the few data points for this class in our dataset.
+
 ![alt text][image12]
 
 * Image 6: Ground truth is a "Speed Limit (30kmph)" image, whereas the model classifies it incorrectly as a "Priority Road" sign with a 0.85 probability and as "Road Work" with 0.15
 probability. As per the confusion matrix, the model didn't learn well from the "Speed Limit" images. Also, as I mentioned earlier, the image of the sign is skewed. Without data augmentation,
 the model wouldn't necessarily classify these correctly.
+
 ![alt text][image13]
 
 * Image 7: Ground truth is a "Stop" image, and the model classifies it correctly as a "Stop" sign with a full confidence (1.0 probability).
+
 ![alt text][image14]
