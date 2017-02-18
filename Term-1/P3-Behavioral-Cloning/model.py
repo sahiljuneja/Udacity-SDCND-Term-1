@@ -1,8 +1,3 @@
-
-# coding: utf-8
-
-# In[1]:
-
 ### Import
 import pickle
 import cv2
