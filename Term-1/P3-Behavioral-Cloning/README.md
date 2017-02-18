@@ -31,6 +31,8 @@ My project includes the following files:
 * model.py containing the script to create and train the model
 * drive.py for driving the car in autonomous mode
 * model.h5 containing a trained convolution neural network 
+* video_record.mp4 showing the car driving autonomously on Track 1 for a lap.
+* output_images folder containing images for this writeup.
 * README.md summarizing the results
 
 ####2. Submission includes functional code
@@ -123,7 +125,7 @@ After adding images and steering angles for all the cameras, and removing some v
 I had `1517` training samples, and `268` validation samples [line 61]. I shuffled this dataset as well in line 60.
 
 When I initially started to train my models (with Udacity data) I noticed that validation loss, and the mean absolute error values were not indicative of how well the model would do. 
-This is understandable since our data is based on one track only which has lots of similar patches, so the loss values wouldn't define how well the training was that well. 
+This is understandable since our data is based on one track only which has lots of similar patches, so the loss values wouldn't define how well the training was. 
 
 So for training my model [lines 180 to 185], I decided to have a callback function [lines 177 to 178] that would save my model whenever I got the lowest validation loss value over all epochs.
 
